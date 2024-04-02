@@ -1,4 +1,7 @@
-
+/*
+* Modified GUI based off of origional starter code provided by McCarty
+*
+* */
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -18,7 +21,6 @@ import javafx.stage.WindowEvent;
 
 public class GuiClient extends Application{
 
-	
 	TextField c1;
 	Button b1;
 	HashMap<String, Scene> sceneMap;
