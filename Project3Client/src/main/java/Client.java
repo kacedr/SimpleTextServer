@@ -5,13 +5,8 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-
-
 public class Client extends Thread{
-
-	
 	Socket socketClient;
-	
 	ObjectOutputStream out;
 	ObjectInputStream in;
 	
