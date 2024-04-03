@@ -25,10 +25,11 @@ import javafx.stage.WindowEvent;
 public class GuiClient extends Application{
 
 	TextField c1, nameEnter;
-	Button b1, b2;
-	Label l1;
+	Button b1, b2, b3, b4, b5, b6, b7;
+	Label l1, l2;
 	HashMap<String, Scene> sceneMap;
 	VBox clientBox, usernameBox;
+	HBox buttonBox;
 	Client clientConnection;
 	ListView<String> listItems2;
 	
@@ -49,8 +50,19 @@ public class GuiClient extends Application{
 		listItems2 = new ListView<String>();
 		
 		c1 = new TextField();
+
 		b1 = new Button("Send");
 		b1.setOnAction(e->{clientConnection.send(c1.getText()); c1.clear();});
+
+		b3 = new Button("Send All");
+
+		b4 = new Button("Create Group");
+
+		b5 = new Button("Members");
+
+		b6 = new Button("Groups");
+
+		l2 = new Label("Funky Wunky Text Server");
 		
 		sceneMap = new HashMap<String, Scene>();
 
@@ -64,6 +76,7 @@ public class GuiClient extends Application{
 
 		b2.setOnAction(e ->{
 			// change this to a try catch block to validate username
+			nameEnter.getText();
 			primaryStage.setScene(sceneMap.get("client"));
 			primaryStage.centerOnScreen();
 		});
@@ -89,9 +102,9 @@ public class GuiClient extends Application{
 		usernameBox.setAlignment(Pos.CENTER);
 
 		l1.setStyle("-fx-cursor: not-allowed; -fx-font-family: 'Constantia'; -fx-text-fill: black; " +
-				"-fx-font-size: 17px; -fx-font-weight: bold;");
+				"-fx-font-size: 15px; -fx-font-weight: bold;");
 
-		nameEnter.setStyle("-fx-border-radius: 10; -fx-background-radius: 10;");
+		nameEnter.setStyle("-fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
 		nameEnter.setMaxWidth(200);
 
 		b2.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
@@ -103,8 +116,27 @@ public class GuiClient extends Application{
 
 	
 	public Scene createClientGui() {
-		
-		clientBox = new VBox(10, c1,b1,listItems2);
+
+		buttonBox = new HBox(10, b1, b3, b4, b5, b6);
+		clientBox = new VBox(10, l2, listItems2, c1, buttonBox);
+
+		clientBox.setAlignment(Pos.CENTER);
+		buttonBox.setAlignment(Pos.CENTER);
+
+		l2.setStyle("-fx-cursor: not-allowed; -fx-font-family: 'Constantia'; -fx-text-fill: black; " +
+				"-fx-font-size: 23px; -fx-font-weight: bold;");
+
+		listItems2.setStyle("-fx-border-color: black;");
+
+		c1.setStyle("-fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
+		c1.setMaxWidth(600);
+
+		b1.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+		b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+		b4.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+		b5.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+		b6.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+
 		return new Scene(clientBox, 800, 600);
 		
 	}
