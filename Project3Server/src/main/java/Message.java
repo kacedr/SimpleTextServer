@@ -17,7 +17,7 @@ public class Message implements Serializable {
     Boolean isNewGroup; // False is user is not creating a group, True otherwise
     Boolean sendAll; // False if the message is private, True otherwise
 
-    ArrayList<String> groupNames; // List of names for group to be created
+    ArrayList<String> groupNames; // List of names for group to be created with
 
     // todo: Add anymore attributes that can be helpful
 }

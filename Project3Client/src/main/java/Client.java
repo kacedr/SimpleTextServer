@@ -9,6 +9,9 @@ public class Client extends Thread{
 	Socket socketClient;
 	ObjectOutputStream out;
 	ObjectInputStream in;
+
+	// what will be sent over
+	Message newMessage;
 	
 	private Consumer<Serializable> callback;
 	

@@ -1,8 +1,8 @@
 /*
-* WARNING: This class must be identical to the message class in the server. If it is not, no messages will be accepted
-* WARNING: This class does not dictate how the data should be gathered. The data can be gathered from text input,
-* drop down menus, etc.
-* */
+ * WARNING: This class must be identical to the message class in the server. If it is not, no messages will be accepted
+ * WARNING: This class does not dictate how the data should be gathered. The data can be gathered from text input,
+ * drop down menus, etc.
+ * */
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ public class Message implements Serializable {
     Boolean isNewGroup; // False is user is not creating a group, True otherwise
     Boolean sendAll; // False if the message is private, True otherwise
 
-    ArrayList<String> groupNames; // List of names for group to be created
+    ArrayList<String> groupNames; // List of names for group to be created with
 
     // todo: Add anymore attributes that can be helpful
 }
