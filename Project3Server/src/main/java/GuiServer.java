@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -15,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
 
 public class GuiServer extends Application{
 
@@ -39,16 +41,33 @@ public class GuiServer extends Application{
 		
 		listItems = new ListView<String>();
 
+		// work around so the colors can be changed in a list view
+		listItems.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+			@Override
+			public ListCell<String> call(ListView<String> listView) {
+				return new ListCell<String>() {
+					@Override
+					protected void updateItem(String item, boolean empty) {
+						super.updateItem(item, empty);
+						if (item != null && item.startsWith("[SERVER]")) {
+							setText(item);
+							setStyle("-fx-text-fill: red;");
+						} else {
+							setText(item);
+							setStyle("-fx-text-fill: black;");
+						}
+					}
+				};
+			}
+		});
+
 		sceneMap = new HashMap<String, Scene>();
 		
 		sceneMap.put("server",  createServerGui());
-		
-		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent t) {
-                Platform.exit();
-                System.exit(0);
-            }
+
+		primaryStage.setOnCloseRequest(t -> {
+            Platform.exit();
+            System.exit(0);
         });
 
 		primaryStage.setScene(sceneMap.get("server"));
@@ -56,7 +75,7 @@ public class GuiServer extends Application{
 		primaryStage.show();
 		
 	}
-	
+
 	public Scene createServerGui() {
 		
 		BorderPane pane = new BorderPane();

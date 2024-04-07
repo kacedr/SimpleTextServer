@@ -16,6 +16,7 @@ public class Message implements Serializable {
     private Boolean isNewUser; // False if user is existing, True if user is new
     private Boolean isNewGroup; // False is user is not creating a group, True otherwise
     private Boolean isSendAll; // False if the message is private, True otherwise
+    private Boolean isServer; // Only the server is allowed to have this prefix true
 
     private ArrayList<String> groupNames; // List of names for group to be created with
 
@@ -37,6 +38,9 @@ public class Message implements Serializable {
 
     public void setIsSendAll(Boolean isSendAll) {this.isSendAll = isSendAll;}
     public Boolean getIsSendAll() {return isSendAll;}
+
+    public void setIsServer(Boolean isServer) {this.isServer = isServer;}
+    public Boolean getIsServer() {return isServer;}
 
     public void addToGroup(String userName) {groupNames.add(this.userName);}
     public ArrayList<String> getGroup() {return groupNames;}

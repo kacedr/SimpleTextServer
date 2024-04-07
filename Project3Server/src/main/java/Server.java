@@ -64,16 +64,27 @@ public class Server {
 						Message error = new Message();
 						error.setMessage("ERROR USERNAME TAKEN");
 						sendMessage(error);
-						// Do not close the connection; wait for the client to send a new username
+						// Do not close the connection, wait for the client to send a new username
 					} else {
-						// Username is good, exit the loop
 						Message success = new Message();
 						success.setMessage("USERNAME GOOD");
-						sendMessage(success);
-						clients.put(userName, this); // Add this client thread to the map
-						callback.accept(userName + " has connected.");
-						userNameSet = true; // Exit the loop
+						sendMessage(success); // Send only to the user who has just connected.
+						clients.put(userName, this); // Add this client to the map
+
+						// So server side known that the user has connected
+						callback.accept("[SERVER] " + userName + " has connected.");
+
+						// Broadcast to all other clients that a new user has connected.
+						Message newUserConnected = new Message();
+						newUserConnected.setMessage(userName + " has connected.");
+						newUserConnected.setUserName("[SERVER]");
+						newUserConnected.setIsSendAll(false);
+						newUserConnected.setIsServer(true);
+						broadcastMessage(newUserConnected);
+
+						userNameSet = true;
 					}
+
 				}
 
 				// Handle further communication after a unique username has been set
@@ -81,11 +92,10 @@ public class Server {
 					Message message = (Message) in.readObject();
 					// Use callback to send message data to GUI for display or further processing
 					callback.accept(userName + ": " + message.getMessage());
-					// Echo the message back to the client or handle as required
-					sendMessage(message);
+					broadcastMessage(message);
 				}
 			} catch (Exception e) {
-				callback.accept("Client " + userName + " disconnected.");
+				callback.accept("[SERVER] " + "Client " + userName + " disconnected.");
 				clients.remove(userName); // Remove this client from the map
 			} finally {
 				try {
@@ -96,13 +106,22 @@ public class Server {
 			}
 		}
 
-		// Utility method to send messages
+		// Utility methods to send messages
+
+		// this might be useless, or its use is to only send back end messages and the client should never see these
 		void sendMessage(Message message) {
 			try {
 				out.writeObject(message);
 				out.flush();
 			} catch (Exception e) {
 				System.out.println("Error sending message to " + userName + ": " + e.getMessage());
+			}
+		}
+
+		// this is what is used to send messages to all clients
+		public void broadcastMessage(Message message) {
+			for (ClientThread clientThread : clients.values()) {
+				clientThread.sendMessage(message);
 			}
 		}
 	}

@@ -38,7 +38,7 @@ public class GuiClient extends Application{
 
 	// for label showing username and who message is being sent to
 	String userName;
-	
+
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -59,17 +59,33 @@ public class GuiClient extends Application{
 				else {
 					// Assuming data is a Message object for normal flow
 					Message incomingMessage = (Message) data;
-					String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
-					listItems2.getItems().add(displayText);
+
+					System.out.println("TESTING TESTING TESTING DELETE");
+					System.out.println(incomingMessage.getMessage());
+					System.out.println(incomingMessage.getIsSendAll());
+
+					// If it's for the whole server from a user
+					if (incomingMessage.getIsSendAll()) {
+						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+						listItems2.getItems().add(displayText);
+						listItems2.refresh();
+					}
+					// if it's a server message
+					else if (incomingMessage.getIsServer()) {
+						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+						listItems2.getItems().add(displayText);
+						listItems2.refresh();
+					}
 				}
 			});
 		});
 
-							
+
+
 		clientConnection.start();
 
 		listItems2 = new ListView<String>();
-		
+
 		c1 = new TextField();
 
 		b1 = new Button("Send");
@@ -127,6 +143,10 @@ public class GuiClient extends Application{
 			messageToSend.setMessage(c1.getText());
 			messageToSend.setUserName(userName);
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
+
+			// todo: remove this, just for testing
+			messageToSend.setIsSendAll(true);
+
 			clientConnection.send(messageToSend);
 			c1.clear();
 		});
@@ -158,7 +178,7 @@ public class GuiClient extends Application{
 		primaryStage.setScene(sceneMap.get("username"));
 		primaryStage.setTitle("Client");
 		primaryStage.show();
-		
+
 	}
 
 	// simple error box
@@ -204,7 +224,7 @@ public class GuiClient extends Application{
 
         return new Scene(usernameBox, 400, 300);
 	}
-	
+
 	public Scene createClientGui() {
 
 		buttonBox = new HBox(10, b1, b3, b4, b5, b6);
@@ -234,7 +254,7 @@ public class GuiClient extends Application{
 		b6.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 
 		return new Scene(clientBox, 800, 600);
-		
+
 	}
 
 }
