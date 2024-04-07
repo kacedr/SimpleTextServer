@@ -3,116 +3,104 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
-import javafx.application.Platform;
-import javafx.scene.control.ListView;
-/*
- * Clicker: A: I really get it    B: No idea what you are talking about
- * C: kind of following
- */
+public class Server {
 
-public class Server{
+	int count = 1; // Counter for clients, used for any purpose you might have beyond identification
+	HashMap<String, ClientThread> clients = new HashMap<>(); // Maps a username to each client thread
+	private Consumer<Serializable> callback; // Callback for UI or logging
 
-	int count = 1;	
-	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
-	TheServer server;
-	private Consumer<Serializable> callback;
-	
-	
-	Server(Consumer<Serializable> call){
-	
+	Server(Consumer<Serializable> call) {
 		callback = call;
-		server = new TheServer();
-		server.start();
+		new TheServer().start(); // Start the server thread
 	}
-	
-	
-	public class TheServer extends Thread{
-		
+
+	class TheServer extends Thread {
 		public void run() {
-		
-			try(ServerSocket mysocket = new ServerSocket(5555);){
-		    System.out.println("Server is waiting for a client!");
-		  
-			
-		    while(true) {
-		
-				ClientThread c = new ClientThread(mysocket.accept(), count);
-				callback.accept("client has connected to server: " + "client #" + count);
-				clients.add(c);
-				c.start();
-				
-				count++;
-				
-			    }
-			}//end of try
-				catch(Exception e) {
-					callback.accept("Server socket did not launch");
+			try (ServerSocket serverSocket = new ServerSocket(5555)) {
+				System.out.println("Server is waiting for a client!");
+
+				while (true) {
+					Socket clientSocket = serverSocket.accept(); // Accept a client connection
+					new ClientThread(clientSocket, count++).start(); // Create and start a client thread
 				}
-			}//end of while
+			} catch (Exception e) {
+				callback.accept("Server socket did not launch: " + e.getMessage());
+			}
 		}
-	
+	}
 
-		class ClientThread extends Thread{
-			
-		
-			Socket connection;
-			int count;
-			ObjectInputStream in;
-			ObjectOutputStream out;
-			
-			ClientThread(Socket s, int count){
-				this.connection = s;
-				this.count = count;	
-			}
-			
-			public void updateClients(String message) {
-				for(int i = 0; i < clients.size(); i++) {
-					ClientThread t = clients.get(i);
-					try {
-					 t.out.writeObject(message);
+	class ClientThread extends Thread {
+		Socket connection;
+		int count;
+		String userName;
+		ObjectInputStream in;
+		ObjectOutputStream out;
+
+		ClientThread(Socket connection, int count) {
+			this.connection = connection;
+			this.count = count;
+		}
+
+		public void run() {
+			try {
+				// Initialize ObjectOutputStream first and flush it
+				out = new ObjectOutputStream(connection.getOutputStream());
+				out.flush();
+
+				// Initialize ObjectInputStream after the ObjectOutputStream
+				in = new ObjectInputStream(connection.getInputStream());
+
+				// Process the initial message for username validation
+				Message initialMessage = (Message) in.readObject();
+				userName = initialMessage.getUserName();
+
+				if (clients.containsKey(userName)) {
+					Message error = new Message();
+					error.setMessage("ERROR USERNAME TAKEN");
+					sendMessage(error);
+					connection.close(); // Close the connection if the username is taken
+					return; // Stop execution of this thread
+				} else {
+					clients.put(userName, this); // Add this client thread to the map
+					callback.accept(userName + " has connected.");
+
+					// Handle further communication
+					while (true) {
+						Message message = (Message) in.readObject();
+						// Use callback to send message data to GUI for display
+						callback.accept(userName + ": " + message.getMessage());
+
+						// Here you can add logic to determine how to handle the message
+						// For example, echoing it back, broadcasting, etc.
+						sendMessage(message); // Echo the message back to the client as an example
 					}
-					catch(Exception e) {}
 				}
-			}
-			
-			public void run(){
-					
+			} catch (Exception e) {
+				callback.accept("Client " + userName + " disconnected.");
+				clients.remove(userName); // Remove this client from the map
+			} finally {
 				try {
-					in = new ObjectInputStream(connection.getInputStream());
-					out = new ObjectOutputStream(connection.getOutputStream());
-					connection.setTcpNoDelay(true);	
-				}
-				catch(Exception e) {
-					System.out.println("Streams not open");
-				}
-				
-				updateClients("new client on server: client #"+count);
-					
-				 while(true) {
-					    try {
-					    	String data = in.readObject().toString();
-					    	callback.accept("client: " + count + " sent: " + data);
-					    	updateClients("client #"+count+" said: "+data);
-					    	
-					    	}
-					    catch(Exception e) {
-					    	callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");
-					    	updateClients("Client #"+count+" has left the server!");
-					    	clients.remove(this);
-					    	break;
-					    }
+					if (connection != null) {
+						connection.close(); // Ensure the connection is closed on exit
 					}
-				}//end of run
-			
-			
-		}//end of client thread
+				} catch (Exception e) {
+					// Log or handle the exception of closing the connection
+				}
+			}
+		}
+
+		// Utility method to send messages
+		void sendMessage(Message message) {
+			try {
+				out.writeObject(message);
+				out.flush();
+			} catch (Exception e) {
+				System.out.println("Error sending message to " + userName + ": " + e.getMessage());
+			}
+		}
+	}
+
 }
-
-
-	
-	
-
-	

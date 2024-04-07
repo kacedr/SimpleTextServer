@@ -37,7 +37,7 @@ public class GuiClient extends Application{
 	ListView<String> listItems2;
 
 	// for label showing username and who message is being sent to
-	StringProperty usName, groupORuser, nameOfGroupOrUser;
+	String userName;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -45,25 +45,25 @@ public class GuiClient extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		clientConnection = new Client(data->{
-				Platform.runLater(()->{listItems2.getItems().add(data.toString());
+		// create a new message class for this user
+
+		clientConnection = new Client(data -> {
+			Platform.runLater(() -> {
+				// cast the data to a Message object
+				Message incomingMessage = (Message) data;
+				// todo: Temporary, used to verify functionality
+				String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+				listItems2.getItems().add(displayText);
 			});
 		});
 							
 		clientConnection.start();
 
 		listItems2 = new ListView<String>();
-
-		// create a new message class for this user
-		Message user = new Message();
 		
 		c1 = new TextField();
 
 		b1 = new Button("Send");
-		b1.setOnAction(e->{
-			//
-			clientConnection.send(c1.getText()); c1.clear();
-		});
 
 		b3 = new Button("Send All");
 		b4 = new Button("Create Group");
@@ -109,20 +109,33 @@ public class GuiClient extends Application{
 		sceneMap.put("client",  createClientGui());
 
 		b2.setOnAction(e ->{
-			// ry catch block to validate username
+			// try catch block to validate username
 			try {
 				// todo: check for duplicate usernames
 				if (nameEnter.getText().isEmpty()) {
 					showAlert("Must Enter A Username");
 				} else {
-					user.userName = nameEnter.getText();
-					s1.setValue(user.userName);
+					Message user = new Message();
+					user.setUserName(nameEnter.getText());
+					userName = nameEnter.getText();
+					s1.setValue(user.getUserName());
+					user.setIsNewUser(true);
+					clientConnection.send(user);
 					primaryStage.setScene(sceneMap.get("client"));
 					primaryStage.centerOnScreen();
 				}
 			} catch (NumberFormatException f) {
 				showAlert("Must Enter A Valid Username");
 			}
+		});
+
+		b1.setOnAction(e->{
+			Message messageToSend = new Message();
+			messageToSend.setMessage(c1.getText());
+			messageToSend.setUserName(userName); // Reuse the username from the initial setup
+			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
+			clientConnection.send(messageToSend);
+			c1.clear();
 		});
 
 		b3.setOnAction(e->{
