@@ -96,6 +96,12 @@ public class Server {
 				}
 			} catch (Exception e) {
 				callback.accept("[SERVER] " + "Client " + userName + " disconnected.");
+				Message userDisconnected = new Message();
+				userDisconnected.setMessage(userName + " has disconnected.");
+				userDisconnected.setUserName("[SERVER]");
+				userDisconnected.setIsSendAll(false);
+				userDisconnected.setIsServer(true);
+				broadcastMessage(userDisconnected);
 				clients.remove(userName); // Remove this client from the map
 			} finally {
 				try {

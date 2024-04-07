@@ -28,6 +28,7 @@ public class Client extends Thread{
 		}
 
 		while (true) {
+			// for username verification
 			try {
 				Message message = (Message) in.readObject();
 				if ("ERROR USERNAME TAKEN".equals(message.getMessage())) {
@@ -46,7 +47,7 @@ public class Client extends Thread{
 		}
 	}
 
-	
+
 	public void send(Message data) {
 		try {
 			out.writeObject(data);

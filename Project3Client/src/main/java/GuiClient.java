@@ -60,10 +60,6 @@ public class GuiClient extends Application{
 					// Assuming data is a Message object for normal flow
 					Message incomingMessage = (Message) data;
 
-					System.out.println("TESTING TESTING TESTING DELETE");
-					System.out.println(incomingMessage.getMessage());
-					System.out.println(incomingMessage.getIsSendAll());
-
 					// If it's for the whole server from a user
 					if (incomingMessage.getIsSendAll()) {
 						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
@@ -75,6 +71,26 @@ public class GuiClient extends Application{
 						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
 						listItems2.getItems().add(displayText);
 						listItems2.refresh();
+
+						// for making text red and bold for server messages
+						listItems2.setCellFactory(lv -> new ListCell<String>() {
+							@Override
+							protected void updateItem(String item, boolean empty) {
+								super.updateItem(item, empty);
+								if (empty || item == null) {
+									setText(null);
+									setGraphic(null);
+								} else {
+									setText(item);
+									if (item.startsWith("[SERVER]")) {
+										setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+									} else {
+										setStyle("-fx-text-fill: black;");
+									}
+								}
+							}
+						});
+
 					}
 				}
 			});
@@ -233,10 +249,9 @@ public class GuiClient extends Application{
 		clientBox.setAlignment(Pos.CENTER);
 		buttonBox.setAlignment(Pos.CENTER);
 
-		// rainbow text lol
 		l2.setStyle("-fx-cursor: not-allowed; -fx-font-family: 'Constantia'; " +
 				"-fx-font-size: 23px; -fx-font-weight: bold;" +
-				"-fx-text-fill: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);");
+				"-fx-text-fill: linear-gradient(to left, black);");
 
 		// this will change
 		l3.setStyle("-fx-cursor: not-allowed; -fx-font-family: 'Constantia'; " +
