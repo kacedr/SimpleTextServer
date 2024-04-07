@@ -53,30 +53,36 @@ public class Server {
 				// Initialize ObjectInputStream after the ObjectOutputStream
 				in = new ObjectInputStream(connection.getInputStream());
 
-				// Process the initial message for username validation
-				Message initialMessage = (Message) in.readObject();
-				userName = initialMessage.getUserName();
+				boolean userNameSet = false;
+				while (!userNameSet) {
+					// Process the initial message for username validation
+					Message initialMessage = (Message) in.readObject();
+					userName = initialMessage.getUserName();
 
-				if (clients.containsKey(userName)) {
-					Message error = new Message();
-					error.setMessage("ERROR USERNAME TAKEN");
-					sendMessage(error);
-					connection.close(); // Close the connection if the username is taken
-					return; // Stop execution of this thread
-				} else {
-					clients.put(userName, this); // Add this client thread to the map
-					callback.accept(userName + " has connected.");
-
-					// Handle further communication
-					while (true) {
-						Message message = (Message) in.readObject();
-						// Use callback to send message data to GUI for display
-						callback.accept(userName + ": " + message.getMessage());
-
-						// Here you can add logic to determine how to handle the message
-						// For example, echoing it back, broadcasting, etc.
-						sendMessage(message); // Echo the message back to the client as an example
+					if (clients.containsKey(userName)) {
+						// If username is taken, inform the client without closing the connection
+						Message error = new Message();
+						error.setMessage("ERROR USERNAME TAKEN");
+						sendMessage(error);
+						// Do not close the connection; wait for the client to send a new username
+					} else {
+						// Username is good, exit the loop
+						Message success = new Message();
+						success.setMessage("USERNAME GOOD");
+						sendMessage(success);
+						clients.put(userName, this); // Add this client thread to the map
+						callback.accept(userName + " has connected.");
+						userNameSet = true; // Exit the loop
 					}
+				}
+
+				// Handle further communication after a unique username has been set
+				while (true) {
+					Message message = (Message) in.readObject();
+					// Use callback to send message data to GUI for display or further processing
+					callback.accept(userName + ": " + message.getMessage());
+					// Echo the message back to the client or handle as required
+					sendMessage(message);
 				}
 			} catch (Exception e) {
 				callback.accept("Client " + userName + " disconnected.");
@@ -86,9 +92,7 @@ public class Server {
 					if (connection != null) {
 						connection.close(); // Ensure the connection is closed on exit
 					}
-				} catch (Exception e) {
-					// Log or handle the exception of closing the connection
-				}
+				} catch (Exception e) {}
 			}
 		}
 

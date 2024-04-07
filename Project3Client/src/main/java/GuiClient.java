@@ -49,13 +49,22 @@ public class GuiClient extends Application{
 
 		clientConnection = new Client(data -> {
 			Platform.runLater(() -> {
-				// cast the data to a Message object
-				Message incomingMessage = (Message) data;
-				// todo: Temporary, used to verify functionality
-				String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
-				listItems2.getItems().add(displayText);
+				if ("USERNAME TAKEN".equals(data.toString())) {
+					showAlert("Username is already taken. Please choose a different one.");
+				}
+				else if ("USERNAME GOOD".equals(data.toString())) {
+					primaryStage.setScene(sceneMap.get("client"));
+					primaryStage.centerOnScreen();
+				}
+				else {
+					// Assuming data is a Message object for normal flow
+					Message incomingMessage = (Message) data;
+					String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+					listItems2.getItems().add(displayText);
+				}
 			});
 		});
+
 							
 		clientConnection.start();
 
@@ -109,30 +118,14 @@ public class GuiClient extends Application{
 		sceneMap.put("client",  createClientGui());
 
 		b2.setOnAction(e ->{
-			// try catch block to validate username
-			try {
-				// todo: check for duplicate usernames
-				if (nameEnter.getText().isEmpty()) {
-					showAlert("Must Enter A Username");
-				} else {
-					Message user = new Message();
-					user.setUserName(nameEnter.getText());
-					userName = nameEnter.getText();
-					s1.setValue(user.getUserName());
-					user.setIsNewUser(true);
-					clientConnection.send(user);
-					primaryStage.setScene(sceneMap.get("client"));
-					primaryStage.centerOnScreen();
-				}
-			} catch (NumberFormatException f) {
-				showAlert("Must Enter A Valid Username");
-			}
+			newUserEnter();
+			s1.setValue(userName);
 		});
 
 		b1.setOnAction(e->{
 			Message messageToSend = new Message();
 			messageToSend.setMessage(c1.getText());
-			messageToSend.setUserName(userName); // Reuse the username from the initial setup
+			messageToSend.setUserName(userName);
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
 			clientConnection.send(messageToSend);
 			c1.clear();
@@ -176,6 +169,24 @@ public class GuiClient extends Application{
 		alert.setHeaderText(null);
 		alert.setContentText(msg);
 		alert.showAndWait();
+	}
+
+	private void newUserEnter() {
+		// try catch block to validate username
+		try {
+			// todo: check for duplicate usernames
+			if (nameEnter.getText().isEmpty()) {
+				showAlert("Must Enter A Username");
+			} else {
+				Message user = new Message();
+				user.setUserName(nameEnter.getText());
+				userName = nameEnter.getText();
+				user.setIsNewUser(true);
+				clientConnection.send(user);
+			}
+		} catch (NumberFormatException f) {
+			showAlert("Must Enter A Valid Username");
+		}
 	}
 
 	public Scene createNameGui() {
