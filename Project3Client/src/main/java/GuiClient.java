@@ -174,7 +174,6 @@ public class GuiClient extends Application{
 	private void newUserEnter() {
 		// try catch block to validate username
 		try {
-			// todo: check for duplicate usernames
 			if (nameEnter.getText().isEmpty()) {
 				showAlert("Must Enter A Username");
 			} else {
