@@ -29,7 +29,7 @@ public class GuiClient extends Application{
 	HBox buttonBox;
 	Client clientConnection;
 	ListView<String> listItems2;
-	ContextMenu usernameMenu, groupUsernameMenu;
+	ContextMenu usernameMenu, groupUsernameMenu, groupsMenu;
 
 	// for label showing username and who message is being sent to
 	String userName;
@@ -41,6 +41,7 @@ public class GuiClient extends Application{
 
 	ArrayList<String> allUsers = new ArrayList<>();
 	ArrayList<String> groupMembers = new ArrayList<>();
+	HashMap<String, ArrayList<String>> groupsAhh = new HashMap<>(); // I ran out of good name choices
 
 	// these are used to update the l3 label
 	StringProperty s1 = new SimpleStringProperty("NULL");
@@ -70,8 +71,16 @@ public class GuiClient extends Application{
 					// Assuming data is a Message object for normal flow
 					Message incomingMessage = (Message) data;
 
+					// if it's from the server saying a new group was created
+					if (incomingMessage.isServerGroupMes) {
+						groupsAhh = new HashMap<>();
+						for (HashMap.Entry<String, ArrayList<String>> entry : incomingMessage.actualGroups.entrySet()) {
+							groupsAhh.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+						}
+						updateGroupShow();
+					}
 					// If it's for the whole server from a user
-					if (incomingMessage.getIsSendAll()) {
+					else if (incomingMessage.getIsSendAll()) {
 						String displayText = "[GLOBAL] " + incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
 						listItems2.getItems().add(displayText);
 						listItems2.refresh();
@@ -90,8 +99,14 @@ public class GuiClient extends Application{
 
 						allUsers.clear();
 						allUsers.addAll(incomingMessage.getUsers());
+						groupsAhh = new HashMap<>();
+						for (HashMap.Entry<String, ArrayList<String>> entry : incomingMessage.actualGroups.entrySet()) {
+							groupsAhh.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+						}
+						updateGroupShow();
 						updateUserMenu();
 						updateGroupUserMenu();
+						updateGroupShow();
 
 						// for making text red and bold for server messages
 						listItems2.setCellFactory(lv -> new ListCell<String>() {
@@ -182,6 +197,7 @@ public class GuiClient extends Application{
 
 				// flag setting
 				messageToSend.setIsNewUser(false); // Since it's not a new user registration message
+				messageToSend.setIsNewGroup(false); // not creating a group
 				messageToSend.setIsServer(false); // not a server message
 				messageToSend.setIsDeletedUser(false); // user still exists if its sending messages
 				messageToSend.setIsWhisper(whisper); // decided through choosing a user
@@ -229,8 +245,10 @@ public class GuiClient extends Application{
 		// for listing users, userMenu is updated everytime a [SERVER] message is sent over
 		usernameMenu = new ContextMenu();
 		groupUsernameMenu = new ContextMenu();
+		groupsMenu = new ContextMenu();
 		updateUserMenu();
 		updateGroupUserMenu();
+		updateGroupShow();
 
 		// todo: Making groups, the users name should highlight when clicked, users don't need to get removed
 		b4.setOnAction(event -> {
@@ -253,6 +271,18 @@ public class GuiClient extends Application{
 				double posY = b5.localToScreen(b5.getBoundsInLocal()).getMinY() - menuHeight;
 				usernameMenu.hide();
 				usernameMenu.show(b5, posX, posY);
+			});
+		});
+
+		b6.setOnAction(event -> {
+			System.out.println(groupsAhh);
+			groupsMenu.show(b6, 0, 0);
+			Platform.runLater(() -> {
+				double menuHeight = groupsMenu.getHeight();
+				double posX = b6.localToScreen(b6.getBoundsInLocal()).getMinX();
+				double posY = b6.localToScreen(b6.getBoundsInLocal()).getMinY() - menuHeight;
+				groupsMenu.hide();
+				groupsMenu.show(b6, posX, posY);
 			});
 		});
 
@@ -373,7 +403,20 @@ public class GuiClient extends Application{
 					Optional<String> result = dialog.showAndWait();
 
 					result.ifPresent(groupName -> {
+						// TODO: Delete testing statement
 						System.out.println("Group name: " + groupName);
+
+						Message sendGroup = new Message();
+						sendGroup.setIsNewGroup(true);
+						sendGroup.groupNames = groupMembers;
+						sendGroup.setGroupName(groupName);
+
+						// send the message to the server saying a group was created
+						clientConnection.send(sendGroup);
+
+						// clear the list of group members
+						groupMembers.clear();
+
 						groupUsernameMenu.hide();
 					});
 				}
@@ -383,6 +426,24 @@ public class GuiClient extends Application{
 			});
 			groupUsernameMenu.getItems().add(createGroupItem);
 		}
+	}
+
+	private void updateGroupShow() {
+		groupsMenu.getItems().clear();
+		for (String groupName : groupsAhh.keySet()) {
+			System.out.println(groupName);
+            Label label = new Label(groupName);
+            Tooltip tooltip = new Tooltip("Whisper to " + groupName);
+            tooltip.setShowDelay(Duration.seconds(0.002));
+            Tooltip.install(label, tooltip);
+
+            CustomMenuItem menuItem = new CustomMenuItem(label, false);
+            menuItem.setOnAction(e -> {
+
+            });
+
+            groupsMenu.getItems().add(menuItem);
+        }
 	}
 
 	// simple error box

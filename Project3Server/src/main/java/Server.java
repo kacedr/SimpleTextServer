@@ -12,7 +12,7 @@ public class Server {
 
 	int count = 1; // Counter for clients, used for any purpose you might have beyond identification
 	HashMap<String, ClientThread> clients = new HashMap<>(); // Maps a username to each client thread
-	HashMap<String, ArrayList<String>> groups; // Map that maps a group name to each list of users
+	HashMap<String, ArrayList<String>> groups = new HashMap<>(); // Map that maps a group name to each list of users
 	private Consumer<Serializable> callback; // Callback for UI or logging
 
 	Server(Consumer<Serializable> call) {
@@ -83,6 +83,7 @@ public class Server {
 						newUserConnected.setUserName("[SERVER]");
 						newUserConnected.setIsSendAll(false);
 						newUserConnected.setIsDeletedUser(false);
+						newUserConnected.isServerGroupMes = false;
 						newUserConnected.setIsWhisper(false);
 						newUserConnected.setIsServer(true);
 						broadcastMessage(newUserConnected);
@@ -96,7 +97,21 @@ public class Server {
 				while (true) {
 					Message message = (Message) in.readObject();
 					// Use callback to send message data to GUI for display or further processing
-					callback.accept(userName + ": " + message.getMessage());
+					if (message.getIsNewGroup()) {
+						// TODO: TESTER DELETE, also this never sends back a message so if its not working that's why
+						message.isServerGroupMes = true;
+						groups.put(message.getGroupName(), message.groupNames);
+
+						System.out.println(message.actualGroups);
+						message.setIsSendAll(false);
+						message.setIsServer(false);
+						message.setIsDeletedUser(false);
+						message.setIsWhisper(false);
+						//broadcastMessage(message);
+					} else {
+						message.isServerGroupMes = false;
+						callback.accept(userName + ": " + message.getMessage());
+					}
 					broadcastMessage(message);
 				}
 			} catch (Exception e) {
@@ -106,6 +121,7 @@ public class Server {
 				userDisconnected.setUserName("[SERVER]");
 				userDisconnected.setIsSendAll(false);
 				userDisconnected.setIsServer(true);
+				userDisconnected.isServerGroupMes = false;
 				userDisconnected.setIsDeletedUser(true);
 				userDisconnected.setIsWhisper(false);
 				clients.remove(userName); // Remove this client from the map
@@ -135,14 +151,25 @@ public class Server {
 		public void broadcastMessage(Message message) {
 			ArrayList<String> allUsernames = new ArrayList<>(clients.keySet());
 			message.addUsers(allUsernames);
+			HashMap<String, ArrayList<String>> deepCopy = new HashMap<>();
+			for (HashMap.Entry<String, ArrayList<String>> entry : groups.entrySet()) {
+				ArrayList<String> listCopy = new ArrayList<>(entry.getValue());
+				deepCopy.put(entry.getKey(), listCopy);
+			}
+			message.actualGroups = deepCopy;
 
+//			// this is for sending group map to clients when a new group is created
+//			if (message.isServerGroupMes) {
+//				for (ClientThread clientThread : clients.values()) {
+//					clientThread.sendMessage(message);
+//				}
+//			}
 			// send only to certain use if it's a whisper
 			if (message.getIsWhisper()) {
 				// Send it back to the user who sent it and the user it's sent to
 				clients.get(message.getUserNameToSendTo()).sendMessage(message);
 				clients.get(message.getUserName()).sendMessage(message);
 				System.out.println(message.getIsWhisper());
-
 			}
 			// send to whole server if sendALl is true
 			else {

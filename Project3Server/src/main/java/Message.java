@@ -5,6 +5,7 @@
  * */
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Message implements Serializable {
     static final long serialVersionUID = 42L;
@@ -20,10 +21,11 @@ public class Message implements Serializable {
     private Boolean isServer; // Only the server is allowed to have this prefix true
     private Boolean isDeletedUser; // Tells if the user should be removed from the local list
     private Boolean isWhisper; // If the message is a pm
+    public Boolean isServerGroupMes; // If the server is sending idk at this point
 
-    private ArrayList<String> userNames; // List of names for group to be created with
-
-
+    private ArrayList<String> userNames; // List of names for the server
+    public ArrayList<String> groupNames; // List of names for group to be created with
+    public HashMap<String, ArrayList<String>> actualGroups; // Map of group names with the users in those groups
 
     // getters and setters for private variables
     public void setMessage(String message) {this.message = message;}
