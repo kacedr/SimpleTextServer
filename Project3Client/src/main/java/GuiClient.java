@@ -450,7 +450,7 @@ public class GuiClient extends Application{
 				System.out.println(groupName);
 				Label label = new Label(groupName);
 				label.setStyle("-fx-text-fill: gray; -fx-cursor: not-allowed");
-				Tooltip tooltip = new Tooltip("Your not in this group " + groupName);
+				Tooltip tooltip = new Tooltip("Your not in the group " + groupName);
 				tooltip.setShowDelay(Duration.seconds(0.002));
 				Tooltip.install(label, tooltip);
 
