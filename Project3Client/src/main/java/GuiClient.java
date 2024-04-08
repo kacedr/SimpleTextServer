@@ -343,6 +343,7 @@ public class GuiClient extends Application{
 					if (label.getStyle().contains("black")) {
 						label.setStyle("-fx-text-fill: red;");
 						groupMembers.add(username);
+						groupMembers.add(userName); // you will be in all groups you create
 						System.out.println(groupMembers);
 					}
 					else if (label.getStyle().contains("red")) {
@@ -431,18 +432,35 @@ public class GuiClient extends Application{
 	private void updateGroupShow() {
 		groupsMenu.getItems().clear();
 		for (String groupName : groupsAhh.keySet()) {
-			System.out.println(groupName);
-            Label label = new Label(groupName);
-            Tooltip tooltip = new Tooltip("Whisper to " + groupName);
-            tooltip.setShowDelay(Duration.seconds(0.002));
-            Tooltip.install(label, tooltip);
+			if (groupsAhh.get(groupName).contains(userName)) {
+				System.out.println(groupName);
+				Label label = new Label(groupName);
+				Tooltip tooltip = new Tooltip("Whisper in " + groupName);
+				tooltip.setShowDelay(Duration.seconds(0.002));
+				Tooltip.install(label, tooltip);
 
-            CustomMenuItem menuItem = new CustomMenuItem(label, false);
-            menuItem.setOnAction(e -> {
+				CustomMenuItem menuItem = new CustomMenuItem(label, false);
+				menuItem.setOnAction(e -> {
 
-            });
+				});
 
-            groupsMenu.getItems().add(menuItem);
+				groupsMenu.getItems().add(menuItem);
+			}
+			else {
+				System.out.println(groupName);
+				Label label = new Label(groupName);
+				label.setStyle("-fx-text-fill: gray; -fx-cursor: not-allowed");
+				Tooltip tooltip = new Tooltip("Your not in this group " + groupName);
+				tooltip.setShowDelay(Duration.seconds(0.002));
+				Tooltip.install(label, tooltip);
+
+				CustomMenuItem menuItem = new CustomMenuItem(label, false);
+				menuItem.setOnAction(e -> {
+
+				});
+
+				groupsMenu.getItems().add(menuItem);
+			}
         }
 	}
 
