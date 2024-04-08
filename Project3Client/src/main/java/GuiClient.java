@@ -38,6 +38,11 @@ public class GuiClient extends Application{
 
 	ArrayList<String> allUsers = new ArrayList<>();
 
+	// these are used to update the l3 label
+	StringProperty s1 = new SimpleStringProperty("NULL");
+	StringProperty s2 = new SimpleStringProperty("Choose Destination");
+	StringProperty s3 = new SimpleStringProperty("");
+
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -142,11 +147,6 @@ public class GuiClient extends Application{
 		Tooltip.install(b6, t4);
 
 		l2 = new Label("Funky Wunky Text Server");
-
-		// these are used to update the l3 label
-		StringProperty s1 = new SimpleStringProperty("NULL");
-		StringProperty s2 = new SimpleStringProperty("NULL");
-		StringProperty s3 = new SimpleStringProperty("NULL");
 
 		// s1: username s2: is it a group, user, or whole server s3: group, or users name
 		l3 = new Label();
@@ -263,6 +263,8 @@ public class GuiClient extends Application{
 
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
+					s2.setValue("User");
+					s3.setValue(username);
 					usernameToSendTo = username;
 					usernameMenu.hide();
 					b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
