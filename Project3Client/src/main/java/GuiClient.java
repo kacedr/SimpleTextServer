@@ -1,4 +1,6 @@
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -40,9 +42,14 @@ public class GuiClient extends Application{
 
 	// for label showing username and who message is being sent to
 	String userName;
+	Boolean sendAll;
+
+	// used to log the username the message is being sent to
+	String usernameToSendTo;
 
 	// todo: Temp list of users DELETE IN FINAL
 	String[] tempU = {"user1", "user2", "user3"};
+	ArrayList<String> allUsers = new ArrayList<>();
 
 	public static void main(String[] args) {
 		launch(args);
@@ -51,7 +58,7 @@ public class GuiClient extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create a new message class for this user
-
+		allUsers.add("null");
 		clientConnection = new Client(data -> {
 			Platform.runLater(() -> {
 				if ("USERNAME TAKEN".equals(data.toString())) {
@@ -76,6 +83,10 @@ public class GuiClient extends Application{
 						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
 						listItems2.getItems().add(displayText);
 						listItems2.refresh();
+
+						allUsers.clear();
+						allUsers.addAll(incomingMessage.getUsers());
+						updateUserMenu();
 
 						// for making text red and bold for server messages
 						listItems2.setCellFactory(lv -> new ListCell<String>() {
@@ -166,7 +177,7 @@ public class GuiClient extends Application{
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
 
 			// todo: remove this, just for testing (replace will global bool for if send all is true)
-			messageToSend.setIsSendAll(true);
+			if (sendAll) {messageToSend.setIsSendAll(true);}
 
 			clientConnection.send(messageToSend);
 			c1.clear();
@@ -180,10 +191,12 @@ public class GuiClient extends Application{
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
 				s2.setValue("Whole Server");
 				s3.setValue("");
+				sendAll = true;
 			} else {
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 				s2.setValue("Choose Destination");
 				s3.setValue("");
+				sendAll = false;
 			}
 		});
 
@@ -197,21 +210,7 @@ public class GuiClient extends Application{
 		usernameMenu = new ContextMenu();
 
 		// todo: tempU is a temp list of usernames for testing, must be changed
-		for (String username : tempU) {
-			Label label = new Label(username);
-			Tooltip tooltip = new Tooltip("Send Private Message To " + username);
-			tooltip.setShowDelay(Duration.seconds(0.002));
-			Tooltip.install(label, tooltip);
-
-			CustomMenuItem menuItem = new CustomMenuItem(label, false);
-			menuItem.setOnAction(e -> {
-				// todo: replace this is just for testing
-				System.out.println(username);
-				usernameMenu.hide();
-			});
-
-			usernameMenu.getItems().add(menuItem);
-		}
+		updateUserMenu();
 
 		// work around to get the usernameMenu to open upwards, very efficient! (joke)
 		b5.setOnAction(event -> {
@@ -244,6 +243,27 @@ public class GuiClient extends Application{
 		primaryStage.setTitle("Client");
 		primaryStage.show();
 
+	}
+
+	// Method to recreate the usernameMenu items based on allUsers
+	private void updateUserMenu() {
+		usernameMenu.getItems().clear(); // Clear existing menu items
+
+		for (String username : allUsers) {
+			Label label = new Label(username);
+			Tooltip tooltip = new Tooltip("Whisper to " + username);
+			tooltip.setShowDelay(Duration.seconds(0.002));
+			Tooltip.install(label, tooltip);
+
+			CustomMenuItem menuItem = new CustomMenuItem(label, false);
+			menuItem.setOnAction(e -> {
+				usernameToSendTo = username; // Logic to handle sending a message to this user
+				System.out.println(username); // Placeholder action
+				usernameMenu.hide();
+			});
+
+			usernameMenu.getItems().add(menuItem);
+		}
 	}
 
 	// simple error box

@@ -17,6 +17,7 @@ public class Message implements Serializable {
     private Boolean isNewGroup; // False is user is not creating a group, True otherwise
     private Boolean isSendAll; // False if the message is private, True otherwise
     private Boolean isServer; // Only the server is allowed to have this prefix true
+    private Boolean isDeletedUser; // Tells if the user should be removed from the local list
 
     private ArrayList<String> userNames; // List of names for group to be created with
 
@@ -44,7 +45,10 @@ public class Message implements Serializable {
     public void setIsServer(Boolean isServer) {this.isServer = isServer;}
     public Boolean getIsServer() {return isServer;}
 
-    public void addUsers(String userName) {userNames.add(this.userName);}
+    public void setIsDeletedUser(Boolean isDeletedUser) {this.isDeletedUser = isDeletedUser;}
+    public Boolean getIsDeletedUser() {return isDeletedUser;}
+
+    public void addUsers(ArrayList<String> userNames) {this.userNames = userNames;}
     public ArrayList<String> getUsers() {return userNames;}
 
     // todo: Add anymore attributes that can be helpful

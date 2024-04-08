@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+import java.util.ArrayList;
+
 public class Server {
 
 	int count = 1; // Counter for clients, used for any purpose you might have beyond identification
@@ -79,6 +81,7 @@ public class Server {
 						newUserConnected.setMessage(userName + " has connected.");
 						newUserConnected.setUserName("[SERVER]");
 						newUserConnected.setIsSendAll(false);
+						newUserConnected.setIsDeletedUser(false);
 						newUserConnected.setIsServer(true);
 						broadcastMessage(newUserConnected);
 
@@ -101,8 +104,9 @@ public class Server {
 				userDisconnected.setUserName("[SERVER]");
 				userDisconnected.setIsSendAll(false);
 				userDisconnected.setIsServer(true);
-				broadcastMessage(userDisconnected);
+				userDisconnected.setIsDeletedUser(true);
 				clients.remove(userName); // Remove this client from the map
+				broadcastMessage(userDisconnected);
 			} finally {
 				try {
 					if (connection != null) {
@@ -126,6 +130,10 @@ public class Server {
 
 		// this is what is used to send messages to all clients
 		public void broadcastMessage(Message message) {
+			ArrayList<String> allUsernames = new ArrayList<>(clients.keySet());
+
+			message.addUsers(allUsernames);
+
 			for (ClientThread clientThread : clients.values()) {
 				clientThread.sendMessage(message);
 			}
