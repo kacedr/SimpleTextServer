@@ -18,7 +18,9 @@ public class Message implements Serializable {
     private Boolean isSendAll; // False if the message is private, True otherwise
     private Boolean isServer; // Only the server is allowed to have this prefix true
 
-    private ArrayList<String> groupNames; // List of names for group to be created with
+    private ArrayList<String> userNames; // List of names for group to be created with
+
+
 
     // getters and setters for private variables
     public void setMessage(String message) {this.message = message;}
@@ -42,8 +44,8 @@ public class Message implements Serializable {
     public void setIsServer(Boolean isServer) {this.isServer = isServer;}
     public Boolean getIsServer() {return isServer;}
 
-    public void addToGroup(String userName) {groupNames.add(this.userName);}
-    public ArrayList<String> getGroup() {return groupNames;}
+    public void addUsers(String userName) {userNames.add(this.userName);}
+    public ArrayList<String> getUsers() {return userNames;}
 
     // todo: Add anymore attributes that can be helpful
 }

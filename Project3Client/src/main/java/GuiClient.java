@@ -1,3 +1,4 @@
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -35,9 +36,13 @@ public class GuiClient extends Application{
 	HBox buttonBox;
 	Client clientConnection;
 	ListView<String> listItems2;
+	ContextMenu usernameMenu;
 
 	// for label showing username and who message is being sent to
 	String userName;
+
+	// todo: Temp list of users DELETE IN FINAL
+	String[] tempU = {"user1", "user2", "user3"};
 
 	public static void main(String[] args) {
 		launch(args);
@@ -83,9 +88,9 @@ public class GuiClient extends Application{
 								} else {
 									setText(item);
 									if (item.startsWith("[SERVER]")) {
-										setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+										setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
 									} else {
-										setStyle("-fx-text-fill: black;");
+										setStyle("-fx-text-fill: black; -fx-font-family: 'Constantia';");
 									}
 								}
 							}
@@ -160,7 +165,7 @@ public class GuiClient extends Application{
 			messageToSend.setUserName(userName);
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
 
-			// todo: remove this, just for testing
+			// todo: remove this, just for testing (replace will global bool for if send all is true)
 			messageToSend.setIsSendAll(true);
 
 			clientConnection.send(messageToSend);
@@ -181,6 +186,50 @@ public class GuiClient extends Application{
 				s3.setValue("");
 			}
 		});
+
+		// todo: We are using a temp list of fake users, needs to be updated with actual username list
+		// What will probably happen is anytime a message is sent over for a new user we will send the list
+		// of users from the map in the server via the message class ArrayList userList (or what ever its called)
+		// we need to make sure to send it after we update the map (especially when a user disconnects)
+		// every time its sent over (we should be able to check if it was via if the list == null or not) we will update
+		// a ArrayList in this class.
+
+		usernameMenu = new ContextMenu();
+
+		// todo: tempU is a temp list of usernames for testing, must be changed
+		for (String username : tempU) {
+			Label label = new Label(username);
+			Tooltip tooltip = new Tooltip("Send Private Message To " + username);
+			tooltip.setShowDelay(Duration.seconds(0.002));
+			Tooltip.install(label, tooltip);
+
+			CustomMenuItem menuItem = new CustomMenuItem(label, false);
+			menuItem.setOnAction(e -> {
+				// todo: replace this is just for testing
+				System.out.println(username);
+				usernameMenu.hide();
+			});
+
+			usernameMenu.getItems().add(menuItem);
+		}
+
+		// work around to get the usernameMenu to open upwards, very efficient! (joke)
+		b5.setOnAction(event -> {
+			usernameMenu.show(b5, 0, 0);
+
+			Platform.runLater(() -> {
+				double menuHeight = usernameMenu.getHeight();
+
+				double posX = b5.localToScreen(b5.getBoundsInLocal()).getMinX();
+				double posY = b5.localToScreen(b5.getBoundsInLocal()).getMinY() - menuHeight;
+				usernameMenu.hide();
+
+				usernameMenu.show(b5, posX, posY);
+			});
+		});
+
+
+
 
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
