@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -7,9 +8,11 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -309,9 +312,13 @@ public class GuiClient extends Application{
 				menuItem.setOnAction(e -> {
 					if (label.getStyle().contains("black")) {
 						label.setStyle("-fx-text-fill: red;");
+						groupMembers.add(username);
+						System.out.println(groupMembers);
 					}
 					else if (label.getStyle().contains("red")) {
 						label.setStyle("-fx-text-fill: black;");
+						groupMembers.remove(username);
+						System.out.println(groupMembers);
 					}
 				});
 
@@ -324,9 +331,56 @@ public class GuiClient extends Application{
 			accept.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 			CustomMenuItem createGroupItem = new CustomMenuItem(accept, false);
 			createGroupItem.setOnAction(e -> {
-				// todo: needs to work
-			});
+				if (!groupMembers.isEmpty()) {
+					Button confirmButton = new Button("Confirm");
+					confirmButton.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 
+					Button cancelButton = new Button("Cancel");
+					cancelButton.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+
+					Dialog<String> dialog = new Dialog<>();
+					dialog.setTitle("Create Group");
+
+					ButtonType confirmButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
+					ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+					dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, cancelButtonType);
+
+					dialog.getDialogPane().lookupButton(confirmButtonType).setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+					dialog.getDialogPane().lookupButton(cancelButtonType).setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+
+					GridPane grid = new GridPane();
+					grid.setHgap(10);
+					grid.setVgap(10);
+					grid.setPadding(new Insets(20, 150, 10, 10));
+
+					TextField groupNameField = new TextField();
+					groupNameField.setPromptText("Group Name");
+					Label label = new Label("Choose a group name:");
+					grid.add(label, 0, 0);
+					grid.add(groupNameField, 1, 0);
+
+					dialog.getDialogPane().setContent(grid);
+
+					Platform.runLater(groupNameField::requestFocus);
+
+					dialog.setResultConverter(dialogButton -> {
+						if (dialogButton == confirmButtonType) {
+							return groupNameField.getText();
+						}
+						return null;
+					});
+
+					Optional<String> result = dialog.showAndWait();
+
+					result.ifPresent(groupName -> {
+						System.out.println("Group name: " + groupName);
+						groupUsernameMenu.hide();
+					});
+				}
+				else {
+					showAlert("Must Choose At Least 1 User");
+				}
+			});
 			groupUsernameMenu.getItems().add(createGroupItem);
 		}
 	}

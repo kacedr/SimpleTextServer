@@ -12,6 +12,7 @@ public class Server {
 
 	int count = 1; // Counter for clients, used for any purpose you might have beyond identification
 	HashMap<String, ClientThread> clients = new HashMap<>(); // Maps a username to each client thread
+	HashMap<String, ArrayList<String>> groups; // Map that maps a group name to each list of users
 	private Consumer<Serializable> callback; // Callback for UI or logging
 
 	Server(Consumer<Serializable> call) {
