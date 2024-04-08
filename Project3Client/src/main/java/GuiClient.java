@@ -175,9 +175,10 @@ public class GuiClient extends Application{
 			messageToSend.setMessage(c1.getText());
 			messageToSend.setUserName(userName);
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
+            messageToSend.setIsSendAll(sendAll);
+			messageToSend.setIsServer(false);
 
-			// todo: remove this, just for testing (replace will global bool for if send all is true)
-			if (sendAll) {messageToSend.setIsSendAll(true);}
+			if (usernameToSendTo != null) {messageToSend.setUserNameToSendTo(usernameToSendTo);}
 
 			clientConnection.send(messageToSend);
 			c1.clear();
@@ -227,9 +228,6 @@ public class GuiClient extends Application{
 			});
 		});
 
-
-
-
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -245,24 +243,26 @@ public class GuiClient extends Application{
 
 	}
 
-	// Method to recreate the usernameMenu items based on allUsers
 	private void updateUserMenu() {
-		usernameMenu.getItems().clear(); // Clear existing menu items
+		usernameMenu.getItems().clear();
 
 		for (String username : allUsers) {
-			Label label = new Label(username);
-			Tooltip tooltip = new Tooltip("Whisper to " + username);
-			tooltip.setShowDelay(Duration.seconds(0.002));
-			Tooltip.install(label, tooltip);
+			// do not display the own user
+			if (!username.equals(userName)){
+				Label label = new Label(username);
+				Tooltip tooltip = new Tooltip("Whisper to " + username);
+				tooltip.setShowDelay(Duration.seconds(0.002));
+				Tooltip.install(label, tooltip);
 
-			CustomMenuItem menuItem = new CustomMenuItem(label, false);
-			menuItem.setOnAction(e -> {
-				usernameToSendTo = username; // Logic to handle sending a message to this user
-				System.out.println(username); // Placeholder action
-				usernameMenu.hide();
-			});
+				CustomMenuItem menuItem = new CustomMenuItem(label, false);
+				menuItem.setOnAction(e -> {
+					usernameToSendTo = username;
+					System.out.println(username); // todo: Placeholder
+					usernameMenu.hide();
+				});
 
-			usernameMenu.getItems().add(menuItem);
+				usernameMenu.getItems().add(menuItem);
+			}
 		}
 	}
 

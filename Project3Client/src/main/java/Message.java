@@ -12,6 +12,7 @@ public class Message implements Serializable {
     private String message; // Message to be sent
     private String groupName; // either name of new group or name of group being sent to
     private String userName; // either name of new username or name of user message is being sent to
+    private String userNameToSendTo;
 
     private Boolean isNewUser; // False if user is existing, True if user is new
     private Boolean isNewGroup; // False is user is not creating a group, True otherwise
@@ -32,6 +33,9 @@ public class Message implements Serializable {
 
     public void setUserName(String userName) {this.userName = userName;}
     public String getUserName() {return userName;}
+
+    public void setUserNameToSendTo(String userNameToSendTo) {this.userNameToSendTo = userNameToSendTo;}
+    public String getUserNameToSendTo() {return userNameToSendTo;}
 
     public void setIsNewUser(Boolean isNewUser) {this.isNewUser = isNewUser;}
     public Boolean getIsNewUser() {return isNewUser;}
