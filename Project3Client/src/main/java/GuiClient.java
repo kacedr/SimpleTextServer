@@ -55,6 +55,8 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
+	// todo: need to go through this entire code and fix all the flags for message class, the flags are causing
+	// 	weird behavior when trying to whisper i think they are all fucked up
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create a new message class for this user
@@ -175,7 +177,7 @@ public class GuiClient extends Application{
 			messageToSend.setMessage(c1.getText());
 			messageToSend.setUserName(userName);
 			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
-            messageToSend.setIsSendAll(sendAll);
+            messageToSend.setIsSendAll(sendAll); // if its to whole server
 			messageToSend.setIsServer(false);
 
 			if (usernameToSendTo != null) {messageToSend.setUserNameToSendTo(usernameToSendTo);}

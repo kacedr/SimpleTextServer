@@ -133,9 +133,13 @@ public class Server {
 			ArrayList<String> allUsernames = new ArrayList<>(clients.keySet());
 
 			message.addUsers(allUsernames);
-
-			for (ClientThread clientThread : clients.values()) {
-				clientThread.sendMessage(message);
+			if (message.getUserNameToSendTo() == null) {
+				for (ClientThread clientThread : clients.values()) {
+					clientThread.sendMessage(message);
+				}
+			}
+			else {
+				clients.get(message.getUserNameToSendTo()).sendMessage(message);
 			}
 		}
 	}
