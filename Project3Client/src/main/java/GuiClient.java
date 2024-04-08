@@ -26,7 +26,7 @@ public class GuiClient extends Application{
 	HBox buttonBox;
 	Client clientConnection;
 	ListView<String> listItems2;
-	ContextMenu usernameMenu;
+	ContextMenu usernameMenu, groupUsernameMenu;
 
 	// for label showing username and who message is being sent to
 	String userName;
@@ -37,6 +37,7 @@ public class GuiClient extends Application{
 	String usernameToSendTo;
 
 	ArrayList<String> allUsers = new ArrayList<>();
+	ArrayList<String> groupMembers = new ArrayList<>();
 
 	// these are used to update the l3 label
 	StringProperty s1 = new SimpleStringProperty("NULL");
@@ -87,6 +88,7 @@ public class GuiClient extends Application{
 						allUsers.clear();
 						allUsers.addAll(incomingMessage.getUsers());
 						updateUserMenu();
+						updateGroupUserMenu();
 
 						// for making text red and bold for server messages
 						listItems2.setCellFactory(lv -> new ListCell<String>() {
@@ -223,7 +225,21 @@ public class GuiClient extends Application{
 
 		// for listing users, userMenu is updated everytime a [SERVER] message is sent over
 		usernameMenu = new ContextMenu();
+		groupUsernameMenu = new ContextMenu();
 		updateUserMenu();
+		updateGroupUserMenu();
+
+		// todo: Making groups, the users name should highlight when clicked, users don't need to get removed
+		b4.setOnAction(event -> {
+			groupUsernameMenu.show(b4, 0, 0);
+			Platform.runLater(() -> {
+				double menuHeight = groupUsernameMenu.getHeight();
+				double posX = b4.localToScreen(b4.getBoundsInLocal()).getMinX();
+				double posY = b4.localToScreen(b4.getBoundsInLocal()).getMinY() - menuHeight;
+				groupUsernameMenu.hide();
+				groupUsernameMenu.show(b4, posX, posY);
+			});
+		});
 
 		// work around to get the usernameMenu to open upwards, very efficient! (joke)
 		b5.setOnAction(event -> {
@@ -275,6 +291,43 @@ public class GuiClient extends Application{
 
 				usernameMenu.getItems().add(menuItem);
 			}
+		}
+	}
+
+	private void updateGroupUserMenu() {
+		groupUsernameMenu.getItems().clear();
+
+		for (String username : allUsers) {
+			// do not display the own user
+			if (!username.equals(userName)){
+				Label label = new Label(username);
+				label.setStyle("-fx-text-fill: black;");
+				Tooltip tooltip = new Tooltip("Add " + username + " to group");
+				tooltip.setShowDelay(Duration.seconds(0.002));
+				Tooltip.install(label, tooltip);
+				CustomMenuItem menuItem = new CustomMenuItem(label, false);
+				menuItem.setOnAction(e -> {
+					if (label.getStyle().contains("black")) {
+						label.setStyle("-fx-text-fill: red;");
+					}
+					else if (label.getStyle().contains("red")) {
+						label.setStyle("-fx-text-fill: black;");
+					}
+				});
+
+				groupUsernameMenu.getItems().add(menuItem);
+			}
+		}
+
+		if (allUsers.size() > 1) {
+			Button accept = new Button("Confirm");
+			accept.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+			CustomMenuItem createGroupItem = new CustomMenuItem(accept, false);
+			createGroupItem.setOnAction(e -> {
+				// todo: needs to work
+			});
+
+			groupUsernameMenu.getItems().add(createGroupItem);
 		}
 	}
 
