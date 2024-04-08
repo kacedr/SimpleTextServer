@@ -82,6 +82,7 @@ public class Server {
 						newUserConnected.setUserName("[SERVER]");
 						newUserConnected.setIsSendAll(false);
 						newUserConnected.setIsDeletedUser(false);
+						newUserConnected.setIsWhisper(false);
 						newUserConnected.setIsServer(true);
 						broadcastMessage(newUserConnected);
 
@@ -105,6 +106,7 @@ public class Server {
 				userDisconnected.setIsSendAll(false);
 				userDisconnected.setIsServer(true);
 				userDisconnected.setIsDeletedUser(true);
+				userDisconnected.setIsWhisper(false);
 				clients.remove(userName); // Remove this client from the map
 				broadcastMessage(userDisconnected);
 			} finally {
@@ -131,15 +133,21 @@ public class Server {
 		// this is what is used to send messages to all clients
 		public void broadcastMessage(Message message) {
 			ArrayList<String> allUsernames = new ArrayList<>(clients.keySet());
-
 			message.addUsers(allUsernames);
-			if (message.getUserNameToSendTo() == null) {
+
+			// send only to certain use if it's a whisper
+			if (message.getIsWhisper()) {
+				// Send it back to the user who sent it and the user it's sent to
+				clients.get(message.getUserNameToSendTo()).sendMessage(message);
+				clients.get(message.getUserName()).sendMessage(message);
+				System.out.println(message.getIsWhisper());
+
+			}
+			// send to whole server if sendALl is true
+			else {
 				for (ClientThread clientThread : clients.values()) {
 					clientThread.sendMessage(message);
 				}
-			}
-			else {
-				clients.get(message.getUserNameToSendTo()).sendMessage(message);
 			}
 		}
 	}

@@ -1,5 +1,3 @@
-import java.awt.event.MouseEvent;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -9,24 +7,14 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-
-import javax.tools.Tool;
-
-/*
-* todo: There should only be two scenes, one for choosing username, one for actual text convos, all other actions should
-*  be handled through dialog boxes and or drop down menus etc.
-* */
 
 public class GuiClient extends Application{
 
@@ -42,13 +30,12 @@ public class GuiClient extends Application{
 
 	// for label showing username and who message is being sent to
 	String userName;
-	Boolean sendAll;
+	Boolean sendAll = false;
+	Boolean whisper = false;
 
 	// used to log the username the message is being sent to
 	String usernameToSendTo;
 
-	// todo: Temp list of users DELETE IN FINAL
-	String[] tempU = {"user1", "user2", "user3"};
 	ArrayList<String> allUsers = new ArrayList<>();
 
 	public static void main(String[] args) {
@@ -76,7 +63,13 @@ public class GuiClient extends Application{
 
 					// If it's for the whole server from a user
 					if (incomingMessage.getIsSendAll()) {
-						String displayText = incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+						String displayText = "[GLOBAL] " + incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+						listItems2.getItems().add(displayText);
+						listItems2.refresh();
+					}
+					// if it's a whisper
+					else if (incomingMessage.getIsWhisper()) {
+						String displayText = "[WHISPER] " + incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
 						listItems2.getItems().add(displayText);
 						listItems2.refresh();
 					}
@@ -101,20 +94,25 @@ public class GuiClient extends Application{
 								} else {
 									setText(item);
 									if (item.startsWith("[SERVER]")) {
+										// Red and bold for SERVER messages
 										setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
+									} else if (item.startsWith("[GLOBAL]")) {
+										// Yellow for GLOBAL messages
+										setStyle("-fx-text-fill: black; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
+									} else if (item.startsWith("[WHISPER]")) {
+										// Light blue for WHISPER messages
+										setStyle("-fx-text-fill: blue; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
 									} else {
-										setStyle("-fx-text-fill: black; -fx-font-family: 'Constantia';");
+										// Default style for any other type of message
+										setStyle("-fx-text-fill: black; fx-font-weight: bold; -fx-font-family: 'Constantia';");
 									}
 								}
 							}
 						});
-
 					}
 				}
 			});
 		});
-
-
 
 		clientConnection.start();
 
@@ -167,65 +165,74 @@ public class GuiClient extends Application{
 		sceneMap.put("username", createNameGui());
 		sceneMap.put("client",  createClientGui());
 
+		// this is the only button that sends messages
+		b1.setOnAction(e->{
+			if (!sendAll && !whisper) {
+				showAlert("Must Choose Destination");
+			}
+			else {
+				Message messageToSend = new Message();
+				messageToSend.setMessage(c1.getText());
+				messageToSend.setUserName(userName);
+
+				// flag setting
+				messageToSend.setIsNewUser(false); // Since it's not a new user registration message
+				messageToSend.setIsServer(false); // not a server message
+				messageToSend.setIsDeletedUser(false); // user still exists if its sending messages
+				messageToSend.setIsWhisper(whisper); // decided through choosing a user
+				messageToSend.setUserNameToSendTo(usernameToSendTo); // if not a whisper it is null
+				messageToSend.setIsSendAll(sendAll); // decided through send all button
+
+				// Debugging
+				System.out.println("Whisper: " + messageToSend.getIsWhisper());
+				System.out.println(messageToSend.getUserNameToSendTo());
+				System.out.println("SendAll: " + messageToSend.getIsSendAll());
+
+				clientConnection.send(messageToSend);
+				c1.clear();
+			}
+		});
+
+		/// sets username but checks with server that username is not taken
 		b2.setOnAction(e ->{
 			newUserEnter();
 			s1.setValue(userName);
 		});
 
-		b1.setOnAction(e->{
-			Message messageToSend = new Message();
-			messageToSend.setMessage(c1.getText());
-			messageToSend.setUserName(userName);
-			messageToSend.setIsNewUser(false); // Since it's not a new user registration message
-            messageToSend.setIsSendAll(sendAll); // if its to whole server
-			messageToSend.setIsServer(false);
-
-			if (usernameToSendTo != null) {messageToSend.setUserNameToSendTo(usernameToSendTo);}
-
-			clientConnection.send(messageToSend);
-			c1.clear();
-		});
-
+		// all the "Send All" button does is change the target sender to the whole server
+		// user still has to click send button
 		b3.setOnAction(e->{
-			// all the "Send All" button does is change the target sender to the whole server
-			// user still has to click send button
 			String getStyle = b3.getStyle();
 			if (getStyle.contains("black")) {
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
+				b5.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 				s2.setValue("Whole Server");
 				s3.setValue("");
+				usernameToSendTo = "";
+				whisper = false;
 				sendAll = true;
 			} else {
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 				s2.setValue("Choose Destination");
 				s3.setValue("");
+				usernameToSendTo = "";
+				whisper = false;
 				sendAll = false;
 			}
 		});
 
-		// todo: We are using a temp list of fake users, needs to be updated with actual username list
-		// What will probably happen is anytime a message is sent over for a new user we will send the list
-		// of users from the map in the server via the message class ArrayList userList (or what ever its called)
-		// we need to make sure to send it after we update the map (especially when a user disconnects)
-		// every time its sent over (we should be able to check if it was via if the list == null or not) we will update
-		// a ArrayList in this class.
-
+		// for listing users, userMenu is updated everytime a [SERVER] message is sent over
 		usernameMenu = new ContextMenu();
-
-		// todo: tempU is a temp list of usernames for testing, must be changed
 		updateUserMenu();
 
 		// work around to get the usernameMenu to open upwards, very efficient! (joke)
 		b5.setOnAction(event -> {
 			usernameMenu.show(b5, 0, 0);
-
 			Platform.runLater(() -> {
 				double menuHeight = usernameMenu.getHeight();
-
 				double posX = b5.localToScreen(b5.getBoundsInLocal()).getMinX();
 				double posY = b5.localToScreen(b5.getBoundsInLocal()).getMinY() - menuHeight;
 				usernameMenu.hide();
-
 				usernameMenu.show(b5, posX, posY);
 			});
 		});
@@ -238,11 +245,9 @@ public class GuiClient extends Application{
             }
         });
 
-
 		primaryStage.setScene(sceneMap.get("username"));
 		primaryStage.setTitle("Client");
 		primaryStage.show();
-
 	}
 
 	private void updateUserMenu() {
@@ -259,8 +264,11 @@ public class GuiClient extends Application{
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
 					usernameToSendTo = username;
-					System.out.println(username); // todo: Placeholder
 					usernameMenu.hide();
+					b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+					b5.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
+					sendAll = false;
+					whisper = true;
 				});
 
 				usernameMenu.getItems().add(menuItem);

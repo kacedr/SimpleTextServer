@@ -19,6 +19,7 @@ public class Message implements Serializable {
     private Boolean isSendAll; // False if the message is private, True otherwise
     private Boolean isServer; // Only the server is allowed to have this prefix true
     private Boolean isDeletedUser; // Tells if the user should be removed from the local list
+    private Boolean isWhisper; // If the message is a pm
 
     private ArrayList<String> userNames; // List of names for group to be created with
 
@@ -51,6 +52,9 @@ public class Message implements Serializable {
 
     public void setIsDeletedUser(Boolean isDeletedUser) {this.isDeletedUser = isDeletedUser;}
     public Boolean getIsDeletedUser() {return isDeletedUser;}
+
+    public void setIsWhisper(Boolean isWhisper) {this.isWhisper = isWhisper;}
+    public Boolean getIsWhisper() {return isWhisper;}
 
     public void addUsers(ArrayList<String> userNames) {this.userNames = userNames;}
     public ArrayList<String> getUsers() {return userNames;}
