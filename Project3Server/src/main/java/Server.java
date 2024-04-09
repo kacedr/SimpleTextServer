@@ -158,14 +158,20 @@ public class Server {
 			}
 			message.actualGroups = deepCopy;
 
-//			// this is for sending group map to clients when a new group is created
-//			if (message.isServerGroupMes) {
-//				for (ClientThread clientThread : clients.values()) {
-//					clientThread.sendMessage(message);
-//				}
-//			}
+			if (message.isToGroup == null) {message.isToGroup = false;}
+
+			// send to groups
+			if (message.isToGroup) {
+                ArrayList<String> tempArr = new ArrayList<>(message.actualGroups.get(message.getGroupName()));
+				System.out.println("TESTING");
+				for (ClientThread clientThread : clients.values()) {
+					if (tempArr.contains(clientThread.userName)) {
+						clientThread.sendMessage(message);
+					}
+				}
+			}
 			// send only to certain use if it's a whisper
-			if (message.getIsWhisper()) {
+			else if (message.getIsWhisper()) {
 				// Send it back to the user who sent it and the user it's sent to
 				clients.get(message.getUserNameToSendTo()).sendMessage(message);
 				clients.get(message.getUserName()).sendMessage(message);

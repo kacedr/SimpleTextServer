@@ -35,9 +35,11 @@ public class GuiClient extends Application{
 	String userName;
 	Boolean sendAll = false;
 	Boolean whisper = false;
+	Boolean toGroup = false;
 
 	// used to log the username the message is being sent to
 	String usernameToSendTo;
+	String groupToSendTo;
 
 	ArrayList<String> allUsers = new ArrayList<>();
 	ArrayList<String> groupMembers = new ArrayList<>();
@@ -78,6 +80,13 @@ public class GuiClient extends Application{
 							groupsAhh.put(entry.getKey(), new ArrayList<>(entry.getValue()));
 						}
 						updateGroupShow();
+					}
+					// if its to a group
+					else if (incomingMessage.isToGroup) {
+						String displayText = "[GROUP: " + incomingMessage.getGroupName() + "] " +
+								incomingMessage.getUserName() + ": " + incomingMessage.getMessage();
+						listItems2.getItems().add(displayText);
+						listItems2.refresh();
 					}
 					// If it's for the whole server from a user
 					else if (incomingMessage.getIsSendAll()) {
@@ -127,6 +136,8 @@ public class GuiClient extends Application{
 									} else if (item.startsWith("[WHISPER]")) {
 										// Light blue for WHISPER messages
 										setStyle("-fx-text-fill: blue; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
+									} else if (item.startsWith("[GROUP")){
+										setStyle("-fx-text-fill: green; -fx-font-weight: bold; -fx-font-family: 'Constantia';");
 									} else {
 										// Default style for any other type of message
 										setStyle("-fx-text-fill: black; fx-font-weight: bold; -fx-font-family: 'Constantia';");
@@ -187,7 +198,7 @@ public class GuiClient extends Application{
 
 		// this is the only button that sends messages
 		b1.setOnAction(e->{
-			if (!sendAll && !whisper) {
+			if (!sendAll && !whisper && !toGroup) {
 				showAlert("Must Choose Destination");
 			}
 			else {
@@ -200,6 +211,8 @@ public class GuiClient extends Application{
 				messageToSend.setIsNewGroup(false); // not creating a group
 				messageToSend.setIsServer(false); // not a server message
 				messageToSend.setIsDeletedUser(false); // user still exists if its sending messages
+				messageToSend.isToGroup = toGroup;
+				messageToSend.setGroupName(groupToSendTo);
 				messageToSend.setIsWhisper(whisper); // decided through choosing a user
 				messageToSend.setUserNameToSendTo(usernameToSendTo); // if not a whisper it is null
 				messageToSend.setIsSendAll(sendAll); // decided through send all button
@@ -232,6 +245,7 @@ public class GuiClient extends Application{
 				usernameToSendTo = "";
 				whisper = false;
 				sendAll = true;
+				toGroup = false;
 			} else {
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 				s2.setValue("Choose Destination");
@@ -239,6 +253,7 @@ public class GuiClient extends Application{
 				usernameToSendTo = "";
 				whisper = false;
 				sendAll = false;
+				toGroup = false;
 			}
 		});
 
@@ -320,6 +335,7 @@ public class GuiClient extends Application{
 					b5.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
 					sendAll = false;
 					whisper = true;
+					toGroup = false;
 				});
 
 				usernameMenu.getItems().add(menuItem);
@@ -441,7 +457,13 @@ public class GuiClient extends Application{
 
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
-
+					s2.setValue("Group");
+					s3.setValue(label.getText());
+					groupToSendTo = label.getText();
+					toGroup = true;
+					whisper = false;
+					sendAll = false;
+					groupsMenu.hide();
 				});
 
 				groupsMenu.getItems().add(menuItem);
