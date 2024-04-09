@@ -13,16 +13,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
+import static jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle.circle;
+
 public class GuiClient extends Application{
 
 	TextField c1, nameEnter;
+	BorderPane listitemPane;
 	Button b1, b2, b3, b4, b5, b6, b7;
 	Label l1, l2, l3, l4, l5;
 	HashMap<String, Scene> sceneMap;
@@ -55,8 +60,6 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
-	// todo: need to go through this entire code and fix all the flags for message class, the flags are causing
-	// 	weird behavior when trying to whisper i think they are all fucked up
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// create a new message class for this user
@@ -154,6 +157,12 @@ public class GuiClient extends Application{
 		clientConnection.start();
 
 		listItems2 = new ListView<String>();
+
+		listitemPane = new BorderPane();
+		listitemPane.setPadding(new Insets(10, 10, 0, 10));
+
+		listitemPane.setCenter(listItems2);
+
 
 		c1 = new TextField();
 
@@ -550,7 +559,7 @@ public class GuiClient extends Application{
 	public Scene createClientGui() {
 
 		buttonBox = new HBox(10, b1, b3, b4, b5, b6);
-		clientBox = new VBox(10, l2, l3, listItems2, c1, buttonBox);
+		clientBox = new VBox(10, l2, l3, listitemPane, c1, buttonBox);
 
 		clientBox.setAlignment(Pos.CENTER);
 		buttonBox.setAlignment(Pos.CENTER);
