@@ -443,19 +443,23 @@ public class GuiClient extends Application{
 					result.ifPresent(groupName -> {
 						// TODO: Delete testing statement
 						System.out.println("Group name: " + groupName);
+						if (groupsAhh.containsKey(groupName)) {
+							// TODO: This is a bit redundant maybe gray button out and add tooltip message
+							showAlert("Group name is taken try again");
+						} else {
+							Message sendGroup = new Message();
+							sendGroup.setIsNewGroup(true);
+							sendGroup.groupNames = groupMembers;
+							sendGroup.setGroupName(groupName);
 
-						Message sendGroup = new Message();
-						sendGroup.setIsNewGroup(true);
-						sendGroup.groupNames = groupMembers;
-						sendGroup.setGroupName(groupName);
+							// send the message to the server saying a group was created
+							clientConnection.send(sendGroup);
 
-						// send the message to the server saying a group was created
-						clientConnection.send(sendGroup);
+							// clear the list of group members
+							groupMembers.clear();
 
-						// clear the list of group members
-						groupMembers.clear();
-
-						groupUsernameMenu.hide();
+							groupUsernameMenu.hide();
+						}
 					});
 					groupMembers.clear();
 				}
