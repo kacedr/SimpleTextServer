@@ -266,7 +266,6 @@ public class GuiClient extends Application{
 		updateGroupUserMenu();
 		updateGroupShow();
 
-		// todo: Making groups, the users name should highlight when clicked, users don't need to get removed
 		b4.setOnAction(event -> {
 			groupUsernameMenu.show(b4, 0, 0);
 			Platform.runLater(() -> {
