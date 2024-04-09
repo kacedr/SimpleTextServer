@@ -21,7 +21,7 @@ public class Message implements Serializable {
     private Boolean isServer; // Only the server is allowed to have this prefix true
     private Boolean isDeletedUser; // Tells if the user should be removed from the local list
     private Boolean isWhisper; // If the message is a pm
-    public Boolean isServerGroupMes; // back end group stuff idk at this point
+    public Boolean isServerGroupMes; // back end group stuff
     public Boolean isToGroup; // so server knows if the message is to a group
 
     private ArrayList<String> userNames; // List of names for the server
