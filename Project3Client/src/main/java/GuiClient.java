@@ -291,7 +291,7 @@ public class GuiClient extends Application{
 				if (men instanceof CustomMenuItem) {
 					Node con = ((CustomMenuItem) men).getContent();
 					if (con instanceof Label) {
-						((Label) con).setStyle("-fx-text-fill: black;");
+						((Label) con).setStyle("--fx-cursor: hand; fx-text-fill: black;");
 					}
 				}
 			}
@@ -341,6 +341,7 @@ public class GuiClient extends Application{
 			// do not display the own user
 			if (!username.equals(userName)){
 				Label label = new Label(username);
+				label.setStyle("-fx-cursor: hand;");
 				Tooltip tooltip = new Tooltip("Whisper to " + username);
 				tooltip.setShowDelay(Duration.seconds(0.002));
 				Tooltip.install(label, tooltip);
@@ -371,20 +372,20 @@ public class GuiClient extends Application{
 			// do not display the own user
 			if (!username.equals(userName)){
 				Label label = new Label(username);
-				label.setStyle("-fx-text-fill: black;");
+				label.setStyle("-fx-cursor: hand;-fx-text-fill: black;");
 				Tooltip tooltip = new Tooltip("Add " + username + " to group");
 				tooltip.setShowDelay(Duration.seconds(0.002));
 				Tooltip.install(label, tooltip);
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
 					if (label.getStyle().contains("black")) {
-						label.setStyle("-fx-text-fill: red;");
+						label.setStyle("-fx-cursor: hand;-fx-text-fill: red;");
 						groupMembers.add(username);
 						groupMembers.add(userName); // you will be in all groups you create
 						System.out.println(groupMembers);
 					}
 					else if (label.getStyle().contains("red")) {
-						label.setStyle("-fx-text-fill: black;");
+						label.setStyle("-fx-cursor: hand;-fx-text-fill: black;");
 						groupMembers.remove(username);
 						System.out.println(groupMembers);
 					}
@@ -480,6 +481,7 @@ public class GuiClient extends Application{
 			if (groupsAhh.get(groupName).contains(userName)) {
 				System.out.println(groupName);
 				Label label = new Label(groupName);
+				label.setStyle("-fx-cursor: hand;");
 				Tooltip tooltip = new Tooltip("Whisper in " + groupName);
 				tooltip.setShowDelay(Duration.seconds(0.002));
 				Tooltip.install(label, tooltip);
