@@ -156,7 +156,7 @@ public class GuiClient extends Application{
 
 		clientConnection.start();
 
-		listItems2 = new ListView<String>();
+		listItems2 = new ListView<>();
 
 		listitemPane = new BorderPane();
 		listitemPane.setPadding(new Insets(10, 10, 0, 10));
@@ -196,7 +196,7 @@ public class GuiClient extends Application{
 				Bindings.concat("Username: ", s1, " Sending To: ", s2, " ", s3)
 		);
 
-		sceneMap = new HashMap<String, Scene>();
+		sceneMap = new HashMap<>();
 
 		// the server will hold all usernames, we need a way to contact the server to validate if a username is allowed
 		l1 = new Label("Enter unique username");
