@@ -10,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -275,6 +276,16 @@ public class GuiClient extends Application{
 				groupUsernameMenu.hide();
 				groupUsernameMenu.show(b4, posX, posY);
 			});
+			// make text label color back to black
+			groupMembers.clear();
+			for (MenuItem men : groupUsernameMenu.getItems()) {
+				if (men instanceof CustomMenuItem) {
+					Node con = ((CustomMenuItem) men).getContent();
+					if (con instanceof Label) {
+						((Label) con).setStyle("-fx-text-fill: black;");
+					}
+				}
+			}
 		});
 
 		// work around to get the usernameMenu to open upwards, very efficient! (joke)
@@ -436,10 +447,14 @@ public class GuiClient extends Application{
 
 						groupUsernameMenu.hide();
 					});
+					groupMembers.clear();
 				}
 				else {
 					showAlert("Must Choose At Least 1 User");
 				}
+			});
+			groupUsernameMenu.setOnCloseRequest(e -> {
+				System.out.println("TESTING");
 			});
 			groupUsernameMenu.getItems().add(createGroupItem);
 		}
@@ -463,6 +478,9 @@ public class GuiClient extends Application{
 					toGroup = true;
 					whisper = false;
 					sendAll = false;
+					if (b3.getStyle().contains("red")){
+						b3.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+					}
 					groupsMenu.hide();
 				});
 
