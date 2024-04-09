@@ -246,6 +246,7 @@ public class GuiClient extends Application{
 		// all the "Send All" button does is change the target sender to the whole server
 		// user still has to click send button
 		b3.setOnAction(e->{
+			b5.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 			String getStyle = b3.getStyle();
 			if (getStyle.contains("black")) {
 				b3.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
@@ -346,6 +347,7 @@ public class GuiClient extends Application{
 
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
+					b6.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
 					s2.setValue("User");
 					s3.setValue(username);
 					usernameToSendTo = username;
@@ -480,6 +482,8 @@ public class GuiClient extends Application{
 
 				CustomMenuItem menuItem = new CustomMenuItem(label, false);
 				menuItem.setOnAction(e -> {
+					b5.setStyle("-fx-cursor: hand; -fx-background-color: black; -fx-text-fill: white;");
+					b6.setStyle("-fx-cursor: hand; -fx-background-color: red; -fx-text-fill: white;");
 					s2.setValue("Group");
 					s3.setValue(label.getText());
 					groupToSendTo = label.getText();
